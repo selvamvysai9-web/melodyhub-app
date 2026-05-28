@@ -28,27 +28,26 @@ class HomeShell extends ConsumerWidget {
               children: [
                 _buildHeader(context),
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        _buildGreeting(),
-                        const SizedBox(height: 20),
-                        _buildFeaturedCard(context, musicProvider),
-                        const SizedBox(height: 20),
-                        _buildTrendingYtHits(context, musicProvider),
-                        const SizedBox(height: 20),
-                        _buildRecentlyPlayed(context, musicProvider),
-                        const SizedBox(height: 20),
-                        _buildQuickBrowse(context),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader('Trending Now'),
-                        const SizedBox(height: 12),
-                        _buildSongList(songs, musicProvider, context),
-                      ],
-                    ),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: const SizedBox(height: 8)),
+                      SliverToBoxAdapter(child: _buildGreeting()),
+                      SliverToBoxAdapter(child: const SizedBox(height: 20)),
+                      SliverToBoxAdapter(child: _buildFeaturedCard(context, musicProvider)),
+                      SliverToBoxAdapter(child: const SizedBox(height: 24)),
+                      SliverToBoxAdapter(child: _buildTrendingYtHits(context, musicProvider)),
+                      SliverToBoxAdapter(child: const SizedBox(height: 24)),
+                      SliverToBoxAdapter(child: _buildRecentlyPlayed(context, musicProvider)),
+                      SliverToBoxAdapter(child: const SizedBox(height: 24)),
+                      SliverToBoxAdapter(child: _buildQuickBrowse(context)),
+                      SliverToBoxAdapter(child: const SizedBox(height: 28)),
+                      SliverToBoxAdapter(child: _buildSectionHeader('Trending Now')),
+                      SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                      SliverPadding(
+                        padding: const EdgeInsets.only(bottom: 120),
+                        sliver: _buildSongList(songs, musicProvider, context),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -70,26 +69,40 @@ class HomeShell extends ConsumerWidget {
     return Stack(
       children: [
         Container(color: AuroraTheme.oledBlack),
-        Positioned(top: -100, right: -80, child: GlowingOrb(size: 220, color: AuroraTheme.accentCyan.withValues(alpha: 0.15), blurRadius: 90)),
-        Positioned(bottom: -60, left: -40, child: GlowingOrb(size: 160, color: AuroraTheme.accentPurple.withValues(alpha: 0.1), blurRadius: 70)),
+        Positioned(top: -100, right: -80, child: GlowingOrb(size: 220, color: AuroraTheme.accentCyan.withValues(alpha: 0.12), blurRadius: 100)),
+        Positioned(bottom: -60, left: -40, child: GlowingOrb(size: 160, color: AuroraTheme.accentPurple.withValues(alpha: 0.08), blurRadius: 80)),
       ],
     );
   }
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 44, height: 44,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: const DecorationImage(image: AssetImage('assets/logo.jpg'), fit: BoxFit.cover),
+              borderRadius: BorderRadius.circular(14),
+              gradient: const LinearGradient(colors: [AuroraTheme.accentCyan, AuroraTheme.accentPurple]),
+              boxShadow: [
+                BoxShadow(
+                  color: AuroraTheme.accentCyan.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
+            child: const Icon(Icons.music_note_rounded, color: Colors.white, size: 24),
           ),
-          const SizedBox(width: 12),
-          const Text('Melody Hub', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary, letterSpacing: -0.5)),
+          const SizedBox(width: 14),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Melody Hub', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary, letterSpacing: -0.5)),
+              Text('Premium Music', style: TextStyle(fontSize: 11, color: AuroraTheme.textMuted, fontWeight: FontWeight.w500)),
+            ],
+          ),
           const Spacer(),
           _buildIconButton(Icons.search_rounded, () => context.go('/search'), AuroraTheme.accentCyan),
           const SizedBox(width: 8),
@@ -103,8 +116,12 @@ class HomeShell extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40, height: 40,
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+        width: 44, height: 44,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+        ),
         child: Icon(icon, color: color, size: 22),
       ),
     );
@@ -113,12 +130,16 @@ class HomeShell extends ConsumerWidget {
   Widget _buildGreeting() {
     final hour = DateTime.now().hour;
     String greeting;
+    IconData icon;
     if (hour < 12) {
       greeting = 'Good morning';
+      icon = Icons.wb_sunny_rounded;
     } else if (hour < 17) {
       greeting = 'Good afternoon';
+      icon = Icons.wb_sunny_rounded;
     } else {
       greeting = 'Good evening';
+      icon = Icons.nights_stay_rounded;
     }
 
     return Padding(
@@ -126,9 +147,15 @@ class HomeShell extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(greeting, style: const TextStyle(fontSize: 14, color: AuroraTheme.textMuted)),
-          const SizedBox(height: 2),
-          const Text('Let\'s find your vibe', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary)),
+          Row(
+            children: [
+              Icon(icon, size: 16, color: AuroraTheme.accentCyan),
+              const SizedBox(width: 8),
+              Text(greeting, style: const TextStyle(fontSize: 13, color: AuroraTheme.textMuted, fontWeight: FontWeight.w500)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text('Let\'s find your vibe', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AuroraTheme.textPrimary, letterSpacing: -0.5)),
         ],
       ),
     );
@@ -144,60 +171,123 @@ class HomeShell extends ConsumerWidget {
             context.push('/player');
           }
         },
-        child: GlassContainer(
-          width: double.infinity, height: 160, borderRadius: 28, padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child: Container(
+          height: 180,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              colors: [
+                AuroraTheme.accentCyan.withValues(alpha: 0.15),
+                AuroraTheme.accentPurple.withValues(alpha: 0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: AuroraTheme.glassMedium.withValues(alpha: 0.3), width: 1.5),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
                   children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AuroraTheme.accentCyan.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AuroraTheme.accentCyan.withValues(alpha: 0.3), width: 1),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.auto_awesome_rounded, size: 12, color: AuroraTheme.accentCyan),
+                                const SizedBox(width: 6),
+                                const Text('FEATURED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: AuroraTheme.accentCyan, letterSpacing: 2)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            musicProvider.playlist.isNotEmpty ? musicProvider.playlist.first.title : 'Aurora Nights',
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary, height: 1.2),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            musicProvider.playlist.isNotEmpty ? musicProvider.playlist.first.artist : 'Tap to play',
+                            style: const TextStyle(fontSize: 13, color: AuroraTheme.textSecondary, fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 14),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [AuroraTheme.accentCyan, AuroraTheme.accentCyan]),
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AuroraTheme.accentCyan.withValues(alpha: 0.4),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+                                const SizedBox(width: 6),
+                                const Text('Play Now', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AuroraTheme.oledBlack)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: AuroraTheme.accentCyan.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                      child: const Text('NEW RELEASE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AuroraTheme.accentCyan, letterSpacing: 1.5)),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      musicProvider.playlist.isNotEmpty ? musicProvider.playlist.first.title : 'Aurora Nights',
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      musicProvider.playlist.isNotEmpty ? musicProvider.playlist.first.artist : 'Tap to play',
-                      style: const TextStyle(fontSize: 13, color: AuroraTheme.textSecondary),
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(color: AuroraTheme.accentCyan, borderRadius: BorderRadius.circular(20)),
-                      child: const Text('Listen Now', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AuroraTheme.oledBlack)),
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: const LinearGradient(
+                          colors: [AuroraTheme.accentCyan, AuroraTheme.accentPurple],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AuroraTheme.accentCyan.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: musicProvider.playlist.isNotEmpty && musicProvider.playlist.first.albumArt.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: CachedNetworkImage(
+                                imageUrl: musicProvider.playlist.first.albumArt,
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) => const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white54)),
+                                errorWidget: (_, __, ___) => const Icon(Icons.music_note_rounded, color: Colors.white70, size: 40),
+                              ),
+                            )
+                          : const Icon(Icons.music_note_rounded, color: Colors.white70, size: 40),
                     ),
                   ],
                 ),
               ),
-              Container(
-                width: 100, height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  gradient: const LinearGradient(colors: [AuroraTheme.accentCyan, AuroraTheme.accentPurple]),
-                ),
-                child: musicProvider.playlist.isNotEmpty && musicProvider.playlist.first.albumArt.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: CachedNetworkImage(
-                          imageUrl: musicProvider.playlist.first.albumArt,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => const Icon(Icons.music_note, color: Colors.white, size: 40),
-                        ),
-                      )
-                    : const Icon(Icons.music_note, color: Colors.white, size: 40),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -211,13 +301,19 @@ class HomeShell extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Text('Recently played', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AuroraTheme.textPrimary)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Icon(Icons.history_rounded, size: 18, color: AuroraTheme.accentPurple),
+              const SizedBox(width: 8),
+              const Text('Recently played', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AuroraTheme.textPrimary)),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 140,
+          height: 150,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -236,20 +332,62 @@ class HomeShell extends ConsumerWidget {
                     }
                     context.push('/player');
                   },
-                  child: SizedBox(
+                  child: Container(
                     width: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: AuroraTheme.glassLight.withValues(alpha: 0.5),
+                      border: Border.all(color: AuroraTheme.glassMedium.withValues(alpha: 0.2), width: 1),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: song.effectiveAlbumArt.isNotEmpty
-                              ? CachedNetworkImage(imageUrl: song.effectiveAlbumArt, width: 110, height: 110, fit: BoxFit.cover)
-                              : Container(width: 110, height: 110, color: AuroraTheme.glassMedium, child: const Icon(Icons.music_note, color: AuroraTheme.textMuted)),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: song.effectiveAlbumArt.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: song.effectiveAlbumArt,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => Container(
+                                      color: AuroraTheme.glassMedium,
+                                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AuroraTheme.accentCyan)),
+                                    ),
+                                    errorWidget: (_, __, ___) => Container(
+                                      color: AuroraTheme.glassMedium,
+                                      child: const Icon(Icons.music_note_rounded, color: AuroraTheme.textMuted, size: 28),
+                                    ),
+                                  )
+                                : Container(
+                                    color: AuroraTheme.glassMedium,
+                                    child: const Icon(Icons.music_note_rounded, color: AuroraTheme.textMuted, size: 28),
+                                  ),
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(song.title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AuroraTheme.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text(song.artist, style: const TextStyle(fontSize: 11, color: AuroraTheme.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  song.title,
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AuroraTheme.textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  song.artist,
+                                  style: const TextStyle(fontSize: 10, color: AuroraTheme.textMuted),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

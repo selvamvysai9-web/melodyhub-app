@@ -13,6 +13,7 @@ import '../services/backend_config.dart';
 import '../services/download_service.dart';
 import '../services/audio_handler.dart';
 import '../services/youtube_service.dart';
+import '../services/youtube_audio_service.dart';
 
 class Song {
   final String id;
@@ -474,7 +475,25 @@ class MusicProvider extends ChangeNotifier {
       }
     }
 
-    // 3. YouTube audio stream for this song's video id (correct per-track audio)
+    // 3. YouTube audio stream via youtube_explode_dart (direct extraction)
+    if (song.youtubeId.isNotEmpty) {
+      try {
+        if (await stale()) return;
+        final streamUrl = await YoutubeAudioService.getAudioStreamUrl(song.youtubeId);
+        if (streamUrl != null && streamUrl.isNotEmpty) {
+          await _player.setAudioSource(AudioSource.uri(Uri.parse(streamUrl)), preload: true);
+          if (await stale()) return;
+          _isAudioReady = true;
+          debugPrint('Playing YouTube stream (youtube_explode): ${song.title} (${song.youtubeId})');
+          notifyListeners();
+          return;
+        }
+      } catch (e) {
+        debugPrint('YouTube stream (youtube_explode) failed: $e');
+      }
+    }
+
+    // 4. YouTube Service fallback (Node.js backend or YouTube API)
     if (song.youtubeId.isNotEmpty) {
       try {
         if (await stale()) return;
@@ -483,16 +502,16 @@ class MusicProvider extends ChangeNotifier {
           await _player.setAudioSource(AudioSource.uri(Uri.parse(streamUrl)), preload: true);
           if (await stale()) return;
           _isAudioReady = true;
-          debugPrint('Playing YouTube stream: ${song.title} (${song.youtubeId})');
+          debugPrint('Playing YouTube stream (backend service): ${song.title} (${song.youtubeId})');
           notifyListeners();
           return;
         }
       } catch (e) {
-        debugPrint('YouTube stream failed: $e');
+        debugPrint('YouTube stream (backend service) failed: $e');
       }
     }
 
-    // 4. Backend audioPath when it looks song-specific
+    // 5. Backend audioPath when it looks song-specific
     if (song.audioPath.isNotEmpty && _isSongSpecificAudioPath(song)) {
       try {
         if (await stale()) return;
@@ -510,7 +529,7 @@ class MusicProvider extends ChangeNotifier {
       }
     }
 
-    // 5. Per-song demo MP3 (stable hash — not playlist index)
+    // 6. Per-song demo MP3 (stable hash — not playlist index)
     final audioUrl = MelodyHubService.getFallbackMp3UrlForKey(_songPlaybackKey(song));
     try {
       if (await stale()) return;
@@ -872,11 +891,23 @@ class MusicProvider extends ChangeNotifier {
     _downloadProgress[id] = 0;
     notifyListeners();
     try {
-      final songIndex = _playlist.indexWhere((s) => s.youtubeId == id);
-      final key = songIndex >= 0
-          ? _songPlaybackKey(_playlist[songIndex])
-          : id;
-      final url = MelodyHubService.getFallbackMp3UrlForKey(key);
+      // First try to get the actual YouTube audio stream URL
+      String? url = await YoutubeAudioService.getAudioStreamUrl(id);
+      
+      // Fallback to Render backend
+      if (url == null && id.isNotEmpty) {
+        url = BackendConfig.stream(id);
+      }
+      
+      // Final fallback to demo MP3
+      if (url == null) {
+        final songIndex = _playlist.indexWhere((s) => s.youtubeId == id);
+        final key = songIndex >= 0
+            ? _songPlaybackKey(_playlist[songIndex])
+            : id;
+        url = MelodyHubService.getFallbackMp3UrlForKey(key);
+      }
+      
       await DownloadService.downloadSong(
         url: url, songId: id,
         onProgress: (p) { _downloadProgress[id] = p; notifyListeners(); },

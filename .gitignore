@@ -1,33 +1,40 @@
-# Flutter
-.dart_tool/
-.packages
-pubspec.lock
+```gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependencies
+.venv/
+venv/
+env/
+.env
+.env.local
+.env.*
+
+# Build artifacts
+dist/
 build/
-*.iml
-.idea/
+target/
+*.egg-info/
+
+# Logs
+*.log
+
+# Editor/IDE
 .vscode/
+.idea/
 *.swp
 *.swo
+*.tmp
 
-# Android
-android/.gradle/
-android/app/build/
-android/local.properties
-android/key.properties
-
-# iOS
-ios/Pods/
-ios/.symlinks/
-ios/Flutter/Flutter.framework
-ios/Flutter/Flutter.podspec
-
-# Env
-.env
-
-# Node
-node_modules/
-functions/node_modules/
+# Coverage
+.coverage
+coverage/
+htmlcov/
 
 # OS
 .DS_Store
 Thumbs.db
+```
