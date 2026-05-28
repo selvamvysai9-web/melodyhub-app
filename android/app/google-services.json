@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "927342164821",
+    "project_id": "fileuploader-90aee",
+    "storage_bucket": "fileuploader-90aee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927342164821:android:ede3986ea154d9f972cddc",
+        "android_client_info": {
+          "package_name": "com.example.melody_hub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "927342164821-elltfqj0mh0tel9rraepfimlop0ftebo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.melody_hub",
+            "certificate_hash": "9175fdc5c490b57a4845343079d83ebc617f2128"
+          }
+        },
+        {
+          "client_id": "927342164821-ivu9cjf87arhftg0q56n98t63qvl816n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABmzbTBQjIeu1SR_jcmEh2DU7tSCxyJ8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "927342164821-ivu9cjf87arhftg0q56n98t63qvl816n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "927342164821-gm2r5g2svjhv9qn5eso0vh6ck5geg6fj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.melodyHub"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

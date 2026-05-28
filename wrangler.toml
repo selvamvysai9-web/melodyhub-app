@@ -1,0 +1,6 @@
+name = "melody-hub-ai"
+main = "cloudflare-worker.js"
+compatibility_date = "2024-12-01"
+
+# Set secret before deploy:
+#   npx wrangler secret put GEMINI_API_KEY
