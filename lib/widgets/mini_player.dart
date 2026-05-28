@@ -18,62 +18,89 @@ class MiniPlayer extends StatelessWidget {
         return GestureDetector(
           onTap: onTap,
           onVerticalDragEnd: (details) {
-            // Swipe up to open full player
             if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
               onTap();
             }
           },
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: AuroraTheme.darkSurface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                colors: [
+                  AuroraTheme.darkSurface.withValues(alpha: 0.95),
+                  AuroraTheme.darkSurface.withValues(alpha: 0.9),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.08),
-                width: 0.5,
+                color: provider.isPlaying 
+                    ? AuroraTheme.accentCyan.withValues(alpha: 0.3)
+                    : Colors.white.withValues(alpha: 0.08),
+                width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AuroraTheme.accentCyan.withValues(alpha: provider.isPlaying ? 0.08 : 0.0),
+                  color: provider.isPlaying
+                      ? AuroraTheme.accentCyan.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.3),
                   blurRadius: 20,
-                  spreadRadius: 2,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
             child: Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 8, 12),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 12, 16),
                   child: Row(
                     children: [
-                      // Album art with playing animation
+                      // Album art with animated border when playing
                       Hero(
                         tag: 'album_art_transition',
                         child: _buildAlbumArt(song, provider.isPlaying),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 14),
                       // Song info
                       Expanded(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              song.title,
-                              style: const TextStyle(
-                                color: AuroraTheme.textPrimary,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              children: [
+                                if (provider.isPlaying)
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    margin: const EdgeInsets.only(right: 6),
+                                    decoration: const BoxDecoration(
+                                      color: AuroraTheme.accentCyan,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Text(
+                                    song.title,
+                                    style: const TextStyle(
+                                      color: AuroraTheme.textPrimary,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
                               song.artist,
                               style: const TextStyle(
                                 color: AuroraTheme.textSecondary,
                                 fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -84,27 +111,29 @@ class MiniPlayer extends StatelessWidget {
                       // Previous button
                       IconButton(
                         icon: const Icon(Icons.skip_previous_rounded,
-                            color: AuroraTheme.textSecondary, size: 24),
+                            color: AuroraTheme.textPrimary, size: 26),
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                         onPressed: provider.previous,
                       ),
                       // Play/Pause button
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
-                            colors: [
-                              AuroraTheme.accentCyan,
-                              AuroraTheme.accentCyan.withValues(alpha: 0.8),
-                            ],
+                            colors: provider.isPlaying
+                                ? [AuroraTheme.accentCyan, AuroraTheme.accentCyan.withValues(alpha: 0.8)]
+                                : [AuroraTheme.glassMedium, AuroraTheme.glassLight],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AuroraTheme.accentCyan.withValues(alpha: 0.3),
-                              blurRadius: 8,
+                              color: provider.isPlaying
+                                  ? AuroraTheme.accentCyan.withValues(alpha: 0.4)
+                                  : Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
@@ -113,8 +142,8 @@ class MiniPlayer extends StatelessWidget {
                             provider.isPlaying
                                 ? Icons.pause_rounded
                                 : Icons.play_arrow_rounded,
-                            color: AuroraTheme.oledBlack,
-                            size: 22,
+                            color: provider.isPlaying ? AuroraTheme.oledBlack : AuroraTheme.textPrimary,
+                            size: 24,
                           ),
                           padding: EdgeInsets.zero,
                           onPressed: provider.playPause,
@@ -123,9 +152,9 @@ class MiniPlayer extends StatelessWidget {
                       // Next button
                       IconButton(
                         icon: const Icon(Icons.skip_next_rounded,
-                            color: AuroraTheme.textSecondary, size: 24),
+                            color: AuroraTheme.textPrimary, size: 26),
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                         onPressed: provider.next,
                       ),
                     ],
@@ -138,8 +167,8 @@ class MiniPlayer extends StatelessWidget {
                   right: 0,
                   child: ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
                     child: _buildProgressBar(provider),
                   ),
@@ -155,12 +184,22 @@ class MiniPlayer extends StatelessWidget {
   Widget _buildAlbumArt(Song song, bool isPlaying) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      width: 46,
-      height: 46,
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isPlaying ? AuroraTheme.accentCyan : Colors.white.withValues(alpha: 0.1),
+          width: 2,
+        ),
         boxShadow: isPlaying
-            ? [BoxShadow(color: AuroraTheme.accentCyan.withValues(alpha: 0.2), blurRadius: 8)]
+            ? [
+                BoxShadow(
+                  color: AuroraTheme.accentCyan.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
             : [],
       ),
       child: ClipRRect(
@@ -168,8 +207,8 @@ class MiniPlayer extends StatelessWidget {
         child: song.effectiveAlbumArt.isNotEmpty
             ? CachedNetworkImage(
                 imageUrl: song.effectiveAlbumArt,
-                width: 46,
-                height: 46,
+                width: 52,
+                height: 52,
                 fit: BoxFit.cover,
                 placeholder: (_, __) => _albumArtPlaceholder(),
                 errorWidget: (_, __, ___) => _albumArtPlaceholder(),
@@ -181,13 +220,13 @@ class MiniPlayer extends StatelessWidget {
 
   Widget _albumArtPlaceholder() {
     return Container(
-      width: 46,
-      height: 46,
+      width: 52,
+      height: 52,
       decoration: BoxDecoration(
-        color: AuroraTheme.glassLight,
+        color: AuroraTheme.glassMedium,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Icon(Icons.music_note, color: AuroraTheme.textMuted, size: 22),
+      child: const Icon(Icons.music_note_rounded, color: AuroraTheme.textMuted, size: 24),
     );
   }
 
@@ -206,8 +245,8 @@ class MiniPlayer extends StatelessWidget {
   Widget _progressIndicator(double value) {
     return LinearProgressIndicator(
       value: value,
-      minHeight: 2.5,
-      backgroundColor: Colors.white.withValues(alpha: 0.06),
+      minHeight: 3,
+      backgroundColor: Colors.white.withValues(alpha: 0.08),
       valueColor: const AlwaysStoppedAnimation<Color>(AuroraTheme.accentCyan),
     );
   }

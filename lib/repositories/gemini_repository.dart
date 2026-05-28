@@ -63,6 +63,31 @@ class GeminiRepository {
           ? dotenv.env['GEMINI_WORKER_URL']!.trim()
           : 'https://melody-hub-ai.your-username.workers.dev';
 
+  /// Search YouTube videos via Cloudflare Worker backend
+  Future<List<Map<String, dynamic>>> searchYouTube(String query, {String language = 'en', int maxResults = 15}) async {
+    try {
+      final response = await http.post(
+        Uri.parse(_workerUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'mode': 'search',
+          'query': query,
+          'maxResults': maxResults,
+          'lang': language,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        final results = data['results'] as List<dynamic>? ?? [];
+        return results.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<GeminiResult> chat(String prompt) async {
     return _post({'prompt': prompt, 'mode': 'chat'}, (data) {
       final reply = data['reply']?.toString();
